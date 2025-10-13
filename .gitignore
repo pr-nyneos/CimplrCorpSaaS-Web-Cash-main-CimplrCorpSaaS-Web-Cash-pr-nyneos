@@ -1,0 +1,11 @@
+# Node modules (for backend and frontend)
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vercel
+
+.scannerwork/
+
+**/Example.tsx
+src/features/masters/entitymaster/Entity/Example.tsx
