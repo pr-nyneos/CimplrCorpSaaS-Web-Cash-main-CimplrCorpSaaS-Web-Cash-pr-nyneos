@@ -5,7 +5,10 @@ import Layout from "../../../components/layout/Layout.tsx";
 import AllProjection from "./AllProjection";
 import ProjectionCreation from "./projectionCreation";
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import { useLocation } from "react-router-dom";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
 const ProjectionTab = () => {
+   const location = useLocation();
   const visibility = usePermissions("projection");
   const TAB_CONFIG = [
     {
@@ -34,15 +37,20 @@ const ProjectionTab = () => {
     // },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "All" 
+    initialTab
   );
-  
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+ if (!visibility) {
+    return <LoadingSpinner />;
+  }
+
+  
+ 
+let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "All":
@@ -62,6 +70,7 @@ const ProjectionTab = () => {
     //   case "Upload":
     //     currentContent = <UploadFile />;
     //     break;
+    
     }
   }
   console.log("Active Tab:", activeTab);

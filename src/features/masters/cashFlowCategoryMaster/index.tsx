@@ -7,7 +7,10 @@ import AllCashFlowCategories from "./AllCashFlowCategories";
 import UploadFile from "./CashFlowCategoryUpload.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import { useLocation } from "react-router-dom";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
 const CashFlowCategoryTab = () => {
+   const location = useLocation();
   const Visibility = usePermissions("cashflow-category-master");   
   const TAB_CONFIG = [
     {
@@ -37,14 +40,24 @@ const CashFlowCategoryTab = () => {
     },
   ];
 
+   const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "All"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
+  // let currentContent = (
+  //   <div className="p-4 text-gray-600">No accessible tabs available.</div>
+  // );
   if (activeTab) {
     switch (activeTab) {
       case "All":
@@ -55,6 +68,11 @@ const CashFlowCategoryTab = () => {
         break;
       case "Upload":
         currentContent = <UploadFile />;
+        break;
+        default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

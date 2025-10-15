@@ -10,7 +10,10 @@ import ERP from "./glAccountMasterErp.tsx";
 import AllGLAccount from "./AllGlAccount.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
+import { useLocation } from "react-router-dom";
 const GLMasterScreen = () => {
+     const location = useLocation();
   const Visibility = usePermissions("gl-account-master");
   const TAB_CONFIG = [
     {
@@ -39,14 +42,21 @@ const GLMasterScreen = () => {
     },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Form" 
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "Form":
@@ -60,6 +70,11 @@ const GLMasterScreen = () => {
         break;
       case "All":
         currentContent = <AllGLAccount />;
+        break;
+          default:
+       currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

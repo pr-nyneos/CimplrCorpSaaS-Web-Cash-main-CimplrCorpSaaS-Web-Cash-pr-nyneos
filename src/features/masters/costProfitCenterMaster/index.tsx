@@ -14,7 +14,10 @@ import ERP from "./costProfitCenterMasterErp.tsx";
 import AllCostProfitCenters from "./AllCostProfitCenter.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
+import { useLocation } from "react-router-dom";
 const CostProfitCenterMaster = () => {
+   const location = useLocation();
   const Visibility = usePermissions("cost-profit-center-master");
   const TAB_CONFIG = [
     {
@@ -43,14 +46,21 @@ const CostProfitCenterMaster = () => {
     },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Form"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "Form":
@@ -64,6 +74,11 @@ const CostProfitCenterMaster = () => {
         break;
       case "All":
         currentContent = <AllCostProfitCenters />;
+        break;
+        default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

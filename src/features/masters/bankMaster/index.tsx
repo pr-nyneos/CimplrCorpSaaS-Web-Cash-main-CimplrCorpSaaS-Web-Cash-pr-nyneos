@@ -7,50 +7,56 @@ import Layout from "../../../components/layout/Layout.tsx";
 import BankMaster from "./BankMaster.tsx";
 import AllBankAccounts from "./AllBank.tsx";
 import UploadFile from "./BankMasterUpload.tsx";
-
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
-
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
 
 const BankAccountTab = () => {
+  const location = useLocation();
   const Visibility = usePermissions("bank-master");
+
   const TAB_CONFIG = [
     {
       id: "All",
       label: "All Bank",
-      icon: List ,
-      visibility: Visibility.allTab,
+      icon: List,
+      visibility: Visibility?.allTab,
     },
     {
       id: "form",
       label: "Manual Entry Form",
       icon: FileEdit,
-      visibility: Visibility.manualEntryForm,
+      visibility: Visibility?.manualEntryForm,
     },
     {
       id: "Upload",
       label: "Bank Master Upload",
       icon: UploadCloud,
-      visibility: Visibility.uploadTab,
+      visibility: Visibility?.uploadTab,
     },
     {
       id: "add",
       label: "Bank Master ERP",
       icon: ChevronsLeftRightEllipsis,
-      visibility: Visibility.erpTab,
+      visibility: Visibility?.erpTab,
     },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
 
-  const location = useLocation();
-  const initialTab = location.state && location.state.from === "form" ? "form" : "All";
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
     initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
+
   if (activeTab) {
     switch (activeTab) {
       case "All":
@@ -61,18 +67,19 @@ const BankAccountTab = () => {
         break;
       case "Upload":
         currentContent = <UploadFile />;
+        break;
+      default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
+        break;
     }
   }
 
   return (
     <Layout title="Bank Master">
       <div className="mb-6 pt-4">
-        <Tabs
-          tabs={TAB_CONFIG}
-          // activeTab={activeTab}
-          switchTab={switchTab}
-          isActiveTab={isActiveTab}
-        />
+        <Tabs tabs={TAB_CONFIG} switchTab={switchTab} isActiveTab={isActiveTab} />
       </div>
       <div className="transition-opacity duration-300">{currentContent}</div>
     </Layout>

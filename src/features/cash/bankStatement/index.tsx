@@ -9,7 +9,10 @@ import BankStatementForm from "./BankStatementForm";
 import AllBankStatement from "./AllBankStatement"
 import ERP from "./erp";
 import { usePermissions } from "../../../hooks/useMasterPermission";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner";
+import { useLocation } from "react-router-dom";
 const BankStatementUpload = () => {
+   const location = useLocation();
   const visibility = usePermissions("bank-statement");
   const TAB_CONFIG = [
     {
@@ -38,14 +41,20 @@ const BankStatementUpload = () => {
     },
   ];
 
+ const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Upload" 
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+ if (!visibility) {
+    return <LoadingSpinner />;
+  }
+
+  
+ 
+let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
           case "form":
@@ -59,6 +68,11 @@ const BankStatementUpload = () => {
         break;
       case "All":
         currentContent = <AllBankStatement />;
+        break;
+        default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

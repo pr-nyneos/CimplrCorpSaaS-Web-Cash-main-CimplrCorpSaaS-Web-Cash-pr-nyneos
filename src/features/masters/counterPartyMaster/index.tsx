@@ -14,7 +14,10 @@ import ERP from "./counterPartyMasterErp.tsx";
 import AllCounterPartyMaster from "./AllCounteryPartyMaster.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import { useLocation } from "react-router-dom";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
 const CounterPartyScreen = () => {
+   const location = useLocation();
   const Visibility = usePermissions("counterparty-master");
   const TAB_CONFIG = [
     {
@@ -43,14 +46,21 @@ const CounterPartyScreen = () => {
     },
   ];
 
+   const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "All"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "Form":
@@ -65,6 +75,11 @@ const CounterPartyScreen = () => {
       case "All":
         currentContent = <AllCounterPartyMaster />;
 
+        break;
+         default:
+         currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

@@ -9,7 +9,10 @@ import UploadFile from "./EntityUpload.tsx";
 // import AllEntityList from "./AllEntityList.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import { useLocation } from "react-router-dom";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
 const CurrencyTab = () => {
+   const location = useLocation();
   const Visibility = usePermissions("entity-master");
   const TAB_CONFIG = [
     {
@@ -38,14 +41,21 @@ const CurrencyTab = () => {
     },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
+  
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Form"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+  
+  if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "form":
@@ -63,6 +73,11 @@ const CurrencyTab = () => {
       // case "Add":
       //   currentContent = <CurrencyMaster />;
       //   break;
+        default:
+       currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
+        break;
     }
   }
 

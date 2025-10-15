@@ -1,15 +1,19 @@
-
+import { useEffect, useState } from "react";
 import { ChevronsLeftRightEllipsis, FileEdit, List } from "lucide-react";
-
 import { useVisibleTabs } from "../../../hooks/useVisibleTabs.tsx";
 import Tabs from "../../../components/layout/Tab.tsx";
 import Layout from "../../../components/layout/Layout.tsx";
 import CurrencyMaster from "./CurrencyMaster.tsx";
 import AllCurrency from "./AllCurrency";
-// import UploadFile from "./CurrencyMasterUpload.tsx";
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
+import { useLocation } from "react-router-dom";
+
 const CurrencyTab = () => {
+  const location = useLocation();
   const Visibility = usePermissions("currency-master");
+  const [pageLoading, setPageLoading] = useState(true);
+
   const TAB_CONFIG = [
     {
       id: "All",
@@ -22,14 +26,7 @@ const CurrencyTab = () => {
       label: "Manual Entry Form",
       icon: FileEdit,
       visibility: Visibility.manualEntryForm,
-      // visibility: true,
     },
-    // {
-    //   id: "Upload",
-    //   label: "Currency Upload",
-    //   icon: UploadCloud,
-    //   visibility: true,
-    // },
     {
       id: "add",
       label: "Currency ERP",
@@ -38,40 +35,65 @@ const CurrencyTab = () => {
     },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
+
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Form" 
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
-  if (activeTab) {
-    switch (activeTab) {
-      case "All":
-        currentContent = <AllCurrency />;
-        break;
-      case "form":
-        currentContent = <CurrencyMaster />;
-        break;
-      // case "Upload":
-      //   currentContent = <UploadFile />;
-      //   break;
+  // Hide loader when permissions ready (for non-API tabs)
+  useEffect(() => {
+    if (Visibility) {
+      // For "form" tab, no async data needed
+      if (initialTab !== "All") setPageLoading(false);
     }
+  }, [Visibility, initialTab]);
+
+  // Callback when child data is done loading
+  const handleDataLoaded = () => setPageLoading(false);
+
+  // ---- Global Loading Spinner ----
+  if (pageLoading || !Visibility) {
+    return (
+      <Layout title="Currency Master">
+        <div className="flex justify-center items-center h-[75vh]">
+          <LoadingSpinner />
+        </div>
+      </Layout>
+    );
+  }
+
+  let currentContent;
+  switch (activeTab) {
+    case "All":
+      currentContent = <AllCurrency onDataLoaded={handleDataLoaded} />;
+      break;
+    case "form":
+      currentContent = <CurrencyMaster />;
+      break;
+    default:
+      currentContent = (
+        <div className="p-4 text-gray-600">No tab available</div>
+      );
   }
 
   return (
     <Layout title="Currency Master">
       <div className="mb-6 pt-4">
-        <Tabs
-          tabs={TAB_CONFIG}
-          switchTab={switchTab}
-          isActiveTab={isActiveTab}
-        />
+        <Tabs tabs={TAB_CONFIG} switchTab={switchTab} isActiveTab={isActiveTab} />
       </div>
-      <div className="transition-opacity duration-300">{currentContent}</div>
+      <div
+  className={`transition-opacity duration-500 ${
+    pageLoading ? "opacity-0" : "opacity-100"
+  }`}
+>
+  {currentContent}
+</div>
     </Layout>
   );
 };
 
 export default CurrencyTab;
+

@@ -12,7 +12,10 @@ import BankBalanceForm from "./BankBalanceForm";
 import AllBankBalancePage from "./AllBankBalance";
 import Upload from "./BankBalanceUpload";
 import { usePermissions } from "../../../hooks/useMasterPermission";
+import { useLocation } from "react-router-dom";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner";
 const BankBalance = () => {
+   const location = useLocation();
   const visibility = usePermissions("bank-balance");
   const TAB_CONFIG = [
     {
@@ -40,15 +43,23 @@ const BankBalance = () => {
       visibility: visibility.erpTab,
     },
   ];
-
+const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "All"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+ if (!visibility) {
+    return <LoadingSpinner />;
+  }
+
+  
+ 
+let currentContent = <LoadingSpinner />;
+  // let currentContent = (
+  //   <div className="p-4 text-gray-600">No accessible tabs available.</div>
+  // );
   if (activeTab) {
     switch (activeTab) {
       case "form":
@@ -62,6 +73,11 @@ const BankBalance = () => {
       //     break;
       case "All":
         currentContent = <AllBankBalancePage />;
+        break;
+        default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
         break;
     }
   }

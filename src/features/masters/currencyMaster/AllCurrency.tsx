@@ -85,7 +85,10 @@ const COLUMNS = [
   "action",
   "expand",
 ];
-const AllCurrency: React.FC = () => {
+type AllCurrencyProps = {
+  onDataLoaded?: () => void; // ✅ parent callback
+};
+const AllCurrency: React.FC<AllCurrencyProps> = ({ onDataLoaded }) => {
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(defaultColumnVisibility);
@@ -99,7 +102,7 @@ const AllCurrency: React.FC = () => {
     {} as CurrencyMaster
   );
   const [data, setData] = useState<CurrencyMaster[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("All");
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,7 +133,9 @@ const AllCurrency: React.FC = () => {
       .then((response) => {
         if (response.data.success && response.data.data) {
           setData(response.data.data);
-          setLoading(false);
+          
+            onDataLoaded?.();
+            setLoading(false);
         } else {
           notify(response.data.error, "error");
           setLoading(false);
@@ -140,7 +145,7 @@ const AllCurrency: React.FC = () => {
         notify("Network error. Please try again.", "error");
         setLoading(false);
       });
-  }, [, refresh]);
+  }, [ refresh]);
 
   // Add handleDelete function
   const handleDelete = async (currency_id: string, currency_code: string) => {

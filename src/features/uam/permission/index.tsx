@@ -33,8 +33,8 @@ const Permission = () => {
   );
 
   let currentContent = (
-    //<div className="p-4 text-gray-600">No accessible tabs available.</div>
-    <LoadingSpinner />
+    <div className="p-4 text-gray-600">No accessible tabs available.</div>
+    //<LoadingSpinner />
   );
   if (activeTab) {
     switch (activeTab) {

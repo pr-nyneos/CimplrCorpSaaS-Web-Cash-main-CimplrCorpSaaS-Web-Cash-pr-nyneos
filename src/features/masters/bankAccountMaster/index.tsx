@@ -14,11 +14,14 @@ import AllBankAccounts from "./AllBankAccounts";
 import UploadFile from "./BankAccountUpload.tsx";
 
 import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
+import { useLocation } from "react-router-dom";
 // import Upload from "./upload.tsx";
 // import Form from "./form.tsx";
 // import ERP from "./erp.tsx";
 
 const BankAccountMasterTab = () => {
+   const location = useLocation();
   const Visibility = usePermissions("bank-account-master");
 
   const TAB_CONFIG = [
@@ -47,15 +50,19 @@ const BankAccountMasterTab = () => {
       visibility: Visibility.erpTab,
     },
   ];
-
+ const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "Form"
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+ if (!Visibility) {
+    return <LoadingSpinner />;
+  }
+
+  let currentContent = <LoadingSpinner />;
+
   if (activeTab) {
     switch (activeTab) {
       case "All":
@@ -70,6 +77,11 @@ const BankAccountMasterTab = () => {
       // case "ERP":
       //   currentContent = <ERP />;
       //   break;
+       default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
+        break;
     }
   }
 

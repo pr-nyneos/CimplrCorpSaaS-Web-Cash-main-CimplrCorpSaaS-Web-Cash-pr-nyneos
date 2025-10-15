@@ -4,9 +4,13 @@ import Tabs from "../../../components/layout/Tab.tsx";
 import Layout from "../../../components/layout/Layout.tsx";
 import FundPlanning from "./FundPlanning";
 import AllFundPlanningRow from "./AllFundPlanning.tsx";
+import { usePermissions } from "../../../hooks/useMasterPermission";
+import LoadingSpinner from "../../../components/layout/LoadingSpinner.tsx";
+import { useLocation } from "react-router-dom";
 // import { usePermissions } from "../../../hooks/useMasterPermission.tsx";
 const FundPlanningTab = () => {
-//   const visibility = usePermissions("projection");
+    const location = useLocation();
+ const visibility = usePermissions("fund-planning");
   const TAB_CONFIG = [
     {
       id: "All",
@@ -34,14 +38,20 @@ const FundPlanningTab = () => {
     // },
   ];
 
+  const initialTab =
+    location.state && location.state.from === "form" ? "form" : "All";
   const { activeTab, switchTab, isActiveTab } = useVisibleTabs(
     TAB_CONFIG,
-    "All" 
+    initialTab
   );
 
-  let currentContent = (
-    <div className="p-4 text-gray-600">No accessible tabs available.</div>
-  );
+ if (!visibility) {
+    return <LoadingSpinner />;
+  }
+
+  
+ 
+let currentContent = <LoadingSpinner />;
   if (activeTab) {
     switch (activeTab) {
       case "All":
@@ -53,6 +63,11 @@ const FundPlanningTab = () => {
     //   case "Upload":
     //     currentContent = <UploadFile />;
     //     break;
+    default:
+        currentContent = (
+          <div className="p-4 text-gray-600">No tab available</div>
+        );
+        break;
     }
   }
 
